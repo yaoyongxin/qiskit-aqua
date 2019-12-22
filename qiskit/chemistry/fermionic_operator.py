@@ -156,7 +156,8 @@ class FermionicOperator:
 
         Each Fermionic Operator is mapped to 2 Pauli Operators, added together with the
         appropriate phase, i.e.:
-
+        # seem opposite, because (0 1), e.g., \sigma_z = -1 is usually denoted for occupied state.
+        # so a_i\^\\dagger => X - iY
         a_i\^\\dagger = Z\^i (X + iY) I\^(n-i-1) = (Z\^i X I\^(n-i-1)) + i (Z\^i Y I\^(n-i-1))
         a_i = Z\^i (X - iY) I\^(n-i-1)
 
@@ -172,8 +173,14 @@ class FermionicOperator:
         """
         a_list = []
         for i in range(n):
+            # (Z\^i X I\^(n-i-1)): 
+            # pauli(z,x) = P_zx = (-i)^dot(z,x) Z^z X^x
+            # P_10 = Z
+            # P_01 = X
             a_z = np.asarray([1] * i + [0] + [0] * (n - i - 1), dtype=np.bool)
             a_x = np.asarray([0] * i + [1] + [0] * (n - i - 1), dtype=np.bool)
+            # (Z\^i Y I\^(n-i-1))
+            # P_11 = -iZX = (-i) iY = Y
             b_z = np.asarray([1] * i + [1] + [0] * (n - i - 1), dtype=np.bool)
             b_x = np.asarray([0] * i + [1] + [0] * (n - i - 1), dtype=np.bool)
             a_list.append((Pauli(a_z, a_x), Pauli(b_z, b_x)))
@@ -419,6 +426,7 @@ class FermionicOperator:
         for alpha in range(2):
             for beta in range(2):
                 pauli_prod = Pauli.sgn_prod(a_i[alpha], a_j[beta])
+                # ...1/2 (X-iY)...1/2(X+iY)...: a^\dagger a
                 coeff = h1_ij / 4 * pauli_prod[1] * np.power(-1j, alpha) * np.power(1j, beta)
                 pauli_term = [coeff, pauli_prod[0]]
                 if np.absolute(pauli_term[0]) > threshold:
